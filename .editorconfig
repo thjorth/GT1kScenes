@@ -1,0 +1,4 @@
+root = true
+[*.py]
+indent_style = tab
+charset = utf-8
