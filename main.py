@@ -11,19 +11,13 @@ import json
 WIN_WIDTH = 800
 WIN_HEIGHT = 480
 
-midi = midi.midi.Midi()
-
 pygame.init()
 pygame.font.init()
 
 background_colour = (0, 0, 0)
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption('Geeksforgeeks')
+pygame.display.set_caption('GT-1000 Scenes')
 screen.fill(background_colour)
-
-preset_widget = widgets.preset.Preset(screen)
-preset = models.preset.Preset(preset_widget)
-preset_widget.render()
 
 pygame.display.flip()
 
@@ -34,18 +28,19 @@ def render():
 	preset_widget.render()
 	pygame.display.flip()
 
-timer = time.time()
+midi = midi.midi.Midi()
+preset_widget = widgets.preset.Preset(screen)
+preset = models.preset.Preset(preset_widget, midi)
+preset.deserialize("0100000000 0 -1 -1 4 -1::0010101000 -6 -1 -1 4 -1::0100011000 4 -1 -1 5 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::")
+preset.select_scene(0)
+preset_widget.render()
+
+render()
 
 while running:
 	# midi stuff first
-
-	msg = midi.midiin.get_message()
-	if msg:
-		message, deltatime = msg
-		timer += deltatime
-		print("@%0.6f %r" % (timer, message))
-		# now write these messages to the midi out to allow midi to pass through
-		midi.midiout.send_message(message)
+	if midi.respond():
+		render()
 
 	for event in pygame.event.get():
 	  
@@ -54,7 +49,7 @@ while running:
 			running = False
 
 		if event.type == pygame.KEYDOWN:
-			#print(pygame.key.name(event.key)
+			print(pygame.key.name(event.key))
 			match pygame.key.name(event.key):
 				case "left":
 					preset_widget.left()
@@ -66,6 +61,10 @@ while running:
 					preset_widget.down()
 				case "space":
 					preset_widget.toggle()
+				case "page up":
+					preset_widget.inc()
+				case "page down":
+					preset_widget.dec()
 				case "1":
 					preset.select_scene(0)
 				case "2":
@@ -85,5 +84,6 @@ while running:
 	
 	time.sleep(0.01)
 		
+print(preset.serialize())
 			
 del midi

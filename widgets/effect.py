@@ -2,12 +2,14 @@ import pygame
 import widgets.iWidget
 import fonts.fonts
 
-from constants import SCREEN_WIDTH
+from constants import (
+    SCREEN_WIDTH,
+    BUTTON_WIDTH,
+    BUTTON_HEIGHT,
+    SPACE_BETWEEN,
+    FONT_SIZE
+)
 
-BUTTON_WIDTH = 90
-BUTTON_HEIGHT = 90
-SPACE_BETWEEN = 20
-FONT_SIZE = 28
 OFFSET_X = 200
 OFFSET_Y = -4
 
