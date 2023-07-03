@@ -1,5 +1,5 @@
 import pygame
-import widgets.effect
+import widgets.effectWidget
 import fonts.fonts
 CC_MAX = 127
 CC_MIN = -1
@@ -12,26 +12,24 @@ from constants import (
 	FONT_SIZE
 )
 
-class CC(widgets.effect.Effect):
-	def __init__(self, screen, posx, posy, color, text):
+class CCWidget(widgets.effectWidget.EffectWidget):
+	def __init__(self, screen, posx, posy, color, text, id):
 		super().__init__(screen, posx, posy, color, text)
 		self.value = -1
+		self.id = id
 
 	def render(self):
 		super().render()
 		s = ""
 		if self.value < 0:
-			s += "-"
-		elif (self.value > 0):
-			s += "+"
+			s += "---"
 		else:
-			s += " "
-		s += str(self.value)
+			s += str(self.value)
 
 		text = self.fonts.effect_font.render(s, True, (255,255,255))
 		self.screen.blit(text, (self.x + 10, self.y + 46))
 
-	def set_volume(self, value):
+	def set_value(self, value):
 		self.value = value
 
 	def inc(self):

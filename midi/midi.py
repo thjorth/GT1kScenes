@@ -11,6 +11,7 @@ EFFECT_CC_START = 71
 CC_VOL = 81
 CC1 = 82
 CC2 = 83
+CC_EXT = 7
 
 NUMBER_OF_EFFECTS = 10
 
@@ -147,11 +148,27 @@ class Midi(singleton.SingletonClass):
 		time.sleep(0.01)
 
 	def output_cc(self, cc):
-		print("output_cc", cc)		
-		msg = [CONTROL_CHANGE | MIDI_EFFECTS_CHANNEL, 82, cc.value]
-		print("cc :", msg)
-		self.midiout.send_message(msg)
-		time.sleep(0.01)
+		if cc.value >= 0 and cc.value < 128:
+			if cc.id == "cc1":
+				msg = [CONTROL_CHANGE | MIDI_EFFECTS_CHANNEL, CC1, cc.value]
+			elif cc.id == "cc2":
+				msg = [CONTROL_CHANGE | MIDI_EFFECTS_CHANNEL, CC2, cc.value]
+			elif cc.id == "ext_cc":
+				msg = [CONTROL_CHANGE | MIDI_EXT_CHANNEL, CC_EXT, cc.value]
+			print("cc :", msg)
+			self.midiout.send_message(msg)
+			time.sleep(0.01)
+
+	def output_pc(self, pc):
+		if pc.value >= 0 and pc.value < 128:
+			msg = None
+			if pc.id == "ext_pc":
+				msg = [CONTROL_CHANGE | MIDI_EXT_CHANNEL, pc.value]
+			if msg:
+				print("pc :", msg)
+				self.midiout.send_message(msg)
+				time.sleep(0.01)
+
 			
 					
 

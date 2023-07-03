@@ -1,8 +1,5 @@
 import pygame
 import time
-import widgets.effect
-import widgets.effectArray
-import widgets.preset
 import models.scene
 import models.preset
 import midi.midi
@@ -25,15 +22,13 @@ running = True
 
 def render():
 	screen.fill(background_colour)
-	preset_widget.render()
+	preset.render()
 	pygame.display.flip()
 
 midi = midi.midi.Midi()
-preset_widget = widgets.preset.Preset(screen)
-preset = models.preset.Preset(preset_widget, midi)
+preset = models.preset.Preset(midi, screen)
 preset.deserialize("0100000000 0 -1 -1 4 -1::0010101000 -6 -1 -1 4 -1::0100011000 4 -1 -1 5 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::")
 preset.select_scene(0)
-preset_widget.render()
 
 render()
 
@@ -52,19 +47,19 @@ while running:
 			print(pygame.key.name(event.key))
 			match pygame.key.name(event.key):
 				case "left":
-					preset_widget.left()
+					preset.left()
 				case "right":
-					preset_widget.right()
+					preset.right()
 				case "up":
-					preset_widget.up()
+					preset.up()
 				case "down":
-					preset_widget.down()
+					preset.down()
 				case "space":
-					preset_widget.toggle()
+					preset.toggle()
 				case "page up":
-					preset_widget.inc()
+					preset.inc()
 				case "page down":
-					preset_widget.dec()
+					preset.dec()
 				case "1":
 					preset.select_scene(0)
 				case "2":

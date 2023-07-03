@@ -1,5 +1,5 @@
 import pygame
-import widgets.effect
+import widgets.effectWidget
 import fonts.fonts
 VOL_MAX = 20
 VOL_MIN = -20
@@ -12,7 +12,7 @@ from constants import (
 	FONT_SIZE
 )
 
-class Volume(widgets.effect.Effect):
+class VolumeWidget(widgets.effectWidget.EffectWidget):
 	def __init__(self, screen, posx, posy, color, text):
 		super().__init__(screen, posx, posy, color, text)
 		self.value = 20

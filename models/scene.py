@@ -21,7 +21,16 @@ class Scene():
 		print(self.serialize())
 
 	def update_cc(self, cc):
-		print("update cc")
+		if cc.id == "cc1":
+			self.cc1 = cc.value
+		elif cc.id == "cc2":
+			self.cc2 = cc.value
+		elif cc.id == "ext_cc":
+			self.ext_cc = cc.value
+		print(self.serialize())
+
+	def update_pc(self, pc):
+		self.ext_pc = pc.value
 
 	def serialize(self):
 		s = ""

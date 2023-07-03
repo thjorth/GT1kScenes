@@ -1,31 +1,42 @@
 import pygame
 import widgets.iWidget
-import widgets.effect
-import widgets.volume
-import widgets.cc
-import widgets.noop
+import widgets.effectWidget
+import widgets.volumeWidget
+import widgets.ccWidget
+import widgets.pcWidget
 import numpy as np
 
 ARRAY_WIDTH = 5
 ARRAY_HEIGHT = 3
 
 
-class EffectsArray():
-	def __init__(self, toggle_callback):
+class EffectsArrayWidget():
+	def __init__(self, change_callback):
 		self.effects = []
 		self.x = 0
 		self.y = 0
-		self.toggle_callback = toggle_callback
-		self.volume_callback = None
-		self.cc_callback = None
-		self.has_focus = True
-
+		self.change_callback = change_callback
 		self.volume = None
 		self.cc1 = None
+		self.cc2 = None
+		self.ext_pc = None
+		self.ext_cc = None
 
 	def add(self, effect) -> None:
 		effect.set_index(len(self.effects))
 		self.effects.append(effect)
+
+		if type(effect) is widgets.volumeWidget.VolumeWidget:
+			self.volume = effect
+		if type(effect) is widgets.ccWidget.CCWidget:
+			if effect.id == "cc1":
+				self.cc1 = effect
+			if effect.id == "cc2":
+				self.cc2 = effect
+			if effect.id == "ext_cc":
+				self.ext_cc = effect
+		if type(effect) is widgets.pcWidget.PCWidget:
+			self.ext_pc = effect
 
 	def add_volume(self,volume):
 		self.add(volume)
@@ -60,24 +71,18 @@ class EffectsArray():
 
 	def toggle(self):
 		self.effects[self.x + self.y * ARRAY_WIDTH].toggle()
-		self.toggle_callback(self.effects[self.x + self.y * ARRAY_WIDTH])
+		self.change_callback(self.effects[self.x + self.y * ARRAY_WIDTH])
 
 	def inc(self):
 		effect = self.effects[self.x + self.y * ARRAY_WIDTH]
 		effect.inc()
-		if (type(effect) is widgets.volume.Volume):
-			self.volume_callback(effect)
-		if (type(effect) is widgets.cc.CC):
-			self.cc_callback(effect)
+		self.change_callback(effect)
 
 	def dec(self):
 		effect = self.effects[self.x + self.y * ARRAY_WIDTH]
 		effect.dec()
-		if (type(effect) is widgets.volume.Volume):
-			self.volume_callback(effect)
-		if (type(effect) is widgets.cc.CC):
-			self.cc_callback(effect)
-	
+		self.change_callback(effect)
+
 	def set_selected(self):
 		self.reset_selected()
 		self.effects[self.x + self.y * ARRAY_WIDTH].select()
@@ -88,6 +93,10 @@ class EffectsArray():
 			self.effects[i].set_enabled(scene.effects[i])
 			i += 1
 		self.volume.set_volume(scene.vol)
+		self.cc1.set_value(scene.cc1)
+		self.cc2.set_value(scene.cc2)
+		self.ext_cc.set_value(scene.ext_cc)
+		self.ext_pc.set_value(scene.ext_pc)
 
 	def set_toggle_callback(self, toggle_callback):
 		self.toggle_callback = toggle_callback

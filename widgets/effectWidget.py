@@ -15,7 +15,7 @@ OFFSET_Y = -4
 
 OFFSET_X = SCREEN_WIDTH - 5 * (BUTTON_WIDTH + SPACE_BETWEEN) - 20
 
-class Effect(widgets.iWidget.IWidget):
+class EffectWidget(widgets.iWidget.IWidget):
 	def __init__(self, screen, posx, posy, color, text) -> None:
 		self.screen = screen
 		self.x = posx * BUTTON_WIDTH + SPACE_BETWEEN + posx * SPACE_BETWEEN + OFFSET_X
