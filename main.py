@@ -27,7 +27,7 @@ def render():
 
 midi = midi.midi.Midi()
 preset = models.preset.Preset(midi, screen)
-preset.deserialize("0100000000 0 -1 -1 4 -1::0010101000 -6 -1 -1 4 -1::0100011000 4 -1 -1 5 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::")
+#preset.deserialize("0100000000 0 -1 -1 4 -1::0010101000 -6 -1 -1 4 -1::0100011000 4 -1 -1 5 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::0000000000 0 -1 -1 4 -1::")
 preset.select_scene(0)
 
 render()
@@ -73,7 +73,7 @@ while running:
 				case "6":
 					preset.select_scene(5)
 				case "s":
-					print(json.dumps(preset))
+					preset.save_presets()
 
 			render()
 	

@@ -1,9 +1,10 @@
-import models.scene
+from models.scene import Scene
 import widgets.effectArrayWidget
 import widgets.effectWidget
 import widgets.volumeWidget
 import widgets.ccWidget
 import widgets.pcWidget
+from data.presetsFile import PresetsFile
 
 import fonts.fonts
 
@@ -69,27 +70,34 @@ class Preset():
 		ext_cc = widgets.ccWidget.CCWidget(screen, 4, 2, COLOR_CC, "Ext CC", "ext_cc")
 		self.effects_widget.add(ext_cc)
 
-		# self.effects_widget.set_toggle_callback(self.toggle_callback)
-		# self.effects_widget.set_volume_callback(self.volume_callback)
-		# self.effects_widget.set_cc_callback(self.cc_callback)
+		self.name = ""
+
+		self.presets_file = PresetsFile()
 
 		self.midi = midi
-		self.old_scene = None
-		self.name = ""
 		midi.set_preset(self)
+		self.reset()
+
+
+	def reset(self):
+		self.old_scene = None
 		
 		self.scenes = (
-			models.scene.Scene(0),
-			models.scene.Scene(1),
-			models.scene.Scene(2),
-			models.scene.Scene(3),
-			models.scene.Scene(4),
-			models.scene.Scene(5),
+			Scene(0),
+			Scene(1),
+			Scene(2),
+			Scene(3),
+			Scene(4),
+			Scene(5),
 		)
 		self.index = 0
 		self.active_scene = None
+		self.deserialize(self.presets_file.get_active_preset())
 		self.load_scene()
-		
+
+	def update_preset(self):
+		self.presets_file.update_active_preset(self.serialize())
+
 	def load_scene(self):
 		self.active_scene = self.scenes[self.index]
 		self.init_from_scene(self.active_scene)
@@ -134,8 +142,7 @@ class Preset():
 			self.active_scene.update_pc(effect)
 			self.midi.output_pc(effect)
 
-		print("on_change_callback")
-		
+		self.update_preset()		
 
 
 	def select_scene(self, index):
@@ -144,6 +151,9 @@ class Preset():
 			self.load_scene()
 			self.midi.output_scene(self.active_scene, self.old_scene)
 			self.old_scene = self.active_scene
+
+	def save_presets(self):
+		self.presets_file.save()
 
 	def serialize(self):
 		s = ""
