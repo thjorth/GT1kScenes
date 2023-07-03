@@ -15,7 +15,6 @@ class PresetsFile():
 			file1.close()
 		while len(self.lines) < MAX_PRESETS:
 			self.lines.append(EMPTY_PRESET)
-		print(self.lines)
 
 	def select_preset(self, index):
 		self.active_preset_index = index

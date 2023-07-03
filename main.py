@@ -78,7 +78,7 @@ while running:
 			render()
 	
 	time.sleep(0.01)
-		
-print(preset.serialize())
+
+preset.save_presets()		
 			
 del midi

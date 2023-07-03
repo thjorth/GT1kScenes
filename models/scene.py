@@ -44,7 +44,6 @@ class Scene():
 		s += " " + str(self.vol)
 		s += " " + str(self.cc1)
 		s += " " + str(self.cc2)
-		s += " " + str(self.cc3)
 		s += " " + str(self.ext_pc)
 		s += " " + str(self.ext_cc)
 		return s
@@ -62,7 +61,7 @@ class Scene():
 			i += 1
 		self.vol = int(parts[1])
 		self.cc1 = int(parts[2])
-		self.cc3 = int(parts[3])
+		self.cc2 = int(parts[3])
 		self.ext_pc = int(parts[4])
 		self.ext_cc = int(parts[5])
 		
