@@ -77,7 +77,7 @@ class Midi(singleton.SingletonClass):
 			self.midiout.send_message(message)
 
 			# now check if we need to do something with the incoming message
-			if message[0] == (PROGRAM_CHANGE | MIDI_SCENE_SELECT_CHANNEL):
+			if message[0] == (PROGRAM_CHANGE | MIDI_EFFECTS_CHANNEL):
 				self.preset.select_scene(message[1])
 				return True
 		return False

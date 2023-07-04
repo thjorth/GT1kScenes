@@ -33,6 +33,8 @@ class Preset():
 		self.screen = screen
 		self.ui_state = STATE_SCENE
 
+		self.copy_buffer = None
+
 		self.effects_widget = widgets.effectArrayWidget.EffectsArrayWidget(self.on_change_callback)
 
 		comp = widgets.effectWidget.EffectWidget(screen, 0, 0, COLOR_COMP, "Comp")
@@ -82,6 +84,9 @@ class Preset():
 		midi.set_preset(self)
 		self.reset()
 
+	def select_preset(self, index):
+		self.presets_file.select_preset(index)
+		self.reset()
 
 	def reset(self):
 		self.old_scene = None
@@ -116,7 +121,6 @@ class Preset():
 		self.render()
 
 	def render(self):
-		print("render", str(self.ui_state))
 		if self.ui_state == STATE_SCENE:
 			self.render_scene()
 		elif self.ui_state == STATE_NAME_EDIT:
@@ -132,7 +136,6 @@ class Preset():
 		self.screen.blit(text, (30, 80))
 
 	def render_scene(self):
-		print("render_scene")
 		text = self.fonts.scene_label_font.render("Scene:", True, SCENE_TEXT_COLOR)
 		self.screen.blit(text, (30, 20))
 
@@ -240,4 +243,16 @@ class Preset():
 	
 	def edit_save(self):
 		self.update_preset()
+
+	def copy_scene(self):
+		self.copy_buffer = self.active_scene.serialize()
+
+	def paste_scene(self):
+		if self.copy_buffer:
+			old_scene = Scene(self.active_scene)
+			old_scene.deserialize(self.active_scene.serialize())
+			self.old_scene = old_scene
+			self.active_scene.deserialize(self.copy_buffer)
+			self.update_preset()
+			self.select_scene(self.active_scene_index)
 		

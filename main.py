@@ -39,7 +39,8 @@ def render():
 
 midi = midi.midi.Midi()
 preset = models.preset.Preset(midi, screen)
-preset.select_scene(0)
+active_preset = 0
+preset.select_scene(active_preset)
 
 render()
 
@@ -55,7 +56,6 @@ while running:
 			running = False
 
 		if event.type == pygame.KEYDOWN:
-			print(event)
 			print(pygame.key.name(event.key))
 			match pygame.key.name(event.key):
 				case "f1":
@@ -95,6 +95,23 @@ while running:
 						preset.select_scene(5)
 					case "s":
 						preset.save_presets()
+					case "[+]":
+						if active_preset < 249:
+							active_preset += 1
+							preset.select_preset(active_preset)
+					case "[-]":
+						if active_preset > 0:
+							active_preset -= 1
+							preset.select_preset(active_preset)
+					case "c":
+						keys = pygame.key.get_pressed()
+						if keys[pygame.K_LCTRL]:
+							preset.copy_scene()
+					case "v":
+						keys = pygame.key.get_pressed()
+						if keys[pygame.K_LCTRL]:
+							preset.paste_scene()
+					
 
 			if ui_state == STATE_NAME_EDIT:
 				key_name = pygame.key.name(event.key)
