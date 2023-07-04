@@ -6,6 +6,9 @@ import widgets.ccWidget
 import widgets.pcWidget
 from data.presetsFile import PresetsFile
 
+STATE_SCENE = 1
+STATE_NAME_EDIT = 2
+
 import fonts.fonts
 
 NUMBER_OF_SCENES = 6
@@ -28,6 +31,7 @@ class Preset():
 		self.fonts = fonts.fonts.Fonts()
 		self.active_scene_index = 0
 		self.screen = screen
+		self.ui_state = STATE_SCENE
 
 		self.effects_widget = widgets.effectArrayWidget.EffectsArrayWidget(self.on_change_callback)
 
@@ -106,9 +110,38 @@ class Preset():
 		self.effects_widget.init_from_scene(scene)
 		self.active_scene_index = scene.index
 
+	def set_ui_state(self, ui_state):
+		self.ui_state = ui_state
+		self.update_preset()
+		self.render()
+
 	def render(self):
+		print("render", str(self.ui_state))
+		if self.ui_state == STATE_SCENE:
+			self.render_scene()
+		elif self.ui_state == STATE_NAME_EDIT:
+			self.render_name_editor()
+
+	def render_name_editor(self):
+		# implement
+		text = self.fonts.scene_label_font.render("Name:", True, SCENE_TEXT_COLOR)
+		self.screen.blit(text, (30, 20))
+
+		name = self.name.replace("\n", "") + "_"
+		text = self.fonts.edit_font.render(name, True, SCENE_TEXT_COLOR)
+		self.screen.blit(text, (30, 80))
+
+	def render_scene(self):
+		print("render_scene")
 		text = self.fonts.scene_label_font.render("Scene:", True, SCENE_TEXT_COLOR)
 		self.screen.blit(text, (30, 20))
+
+		preset_str = "#" + str(self.presets_file.active_preset_index + 1)
+		name = self.name.replace("\n", "")
+		if name != "":
+			preset_str += "   " + name
+		text = self.fonts.scene_label_font.render(preset_str, True, SCENE_TEXT_COLOR)
+		self.screen.blit(text, (240, 20))
 
 		scene_no = self.fonts.scene_font.render(str(self.active_scene_index + 1), True, SCENE_TEXT_COLOR)
 		self.screen.blit(scene_no, (20, 50))
@@ -192,4 +225,19 @@ class Preset():
 	def dec(self):
 		self.effects_widget.dec()
 
+	def edit_backspace(self):
+		name = self.name.replace("\n", "")
+		if len(name) > 0:
+			name = name[:-1]
+		self.name = name + "\n"
+
+		self.update_preset()
+
+	def edit_add_char(self, char):
+		name = self.name.replace("\n", "")
+		name += char
+		self.name = name + "\n"
+	
+	def edit_save(self):
+		self.update_preset()
 		

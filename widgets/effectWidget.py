@@ -11,7 +11,7 @@ from constants import (
 )
 
 OFFSET_X = 200
-OFFSET_Y = -4
+OFFSET_Y = 100
 
 OFFSET_X = SCREEN_WIDTH - 5 * (BUTTON_WIDTH + SPACE_BETWEEN) - 20
 
