@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 *.pyc
+presets.txt
 
 # C extensions
 *.so
