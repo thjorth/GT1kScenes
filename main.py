@@ -64,7 +64,11 @@ while running:
 			elif key_name == "f2":
 				ui_state = STATE_NAME_EDIT
 				preset.set_ui_state(STATE_NAME_EDIT)
-
+			elif key_name == "q":
+				keys = pygame.key.get_pressed()
+				if keys[pygame.K_LCTRL]:
+					running = False
+				
 			if ui_state == STATE_SCENE:
 				if key_name == "left":
 					preset.left()
