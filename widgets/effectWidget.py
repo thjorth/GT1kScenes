@@ -39,9 +39,8 @@ class EffectWidget(widgets.iWidget.IWidget):
 		else:
 			selected_color = (0,0,0)
 
-		rect = pygame.Rect(self.x - 10, self.y - 10, BUTTON_WIDTH + 20, BUTTON_HEIGHT + 20)
-		pygame.draw.rect(self.screen, selected_color, rect, 12)
-		pygame.draw.rect(self.screen, self.color, pygame.Rect(self.x, self.y, BUTTON_WIDTH, BUTTON_HEIGHT), width)
+		pygame.draw.rect(self.screen, selected_color, pygame.Rect(self.x - 10, self.y - 10, BUTTON_WIDTH + 20, BUTTON_HEIGHT + 20), 12, 15)
+		pygame.draw.rect(self.screen, self.color, pygame.Rect(self.x, self.y, BUTTON_WIDTH, BUTTON_HEIGHT), width, 10)
 		text = self.fonts.effect_font.render(self.text, True, text_color)
 		self.screen.blit(text, (self.x + 10, self.y + 10))
 
