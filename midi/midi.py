@@ -46,7 +46,7 @@ class Midi(singleton.SingletonClass):
 			print("MIDI out:", available_out_ports[self.midiout_index])
 			self.midiout.open_port(self.midiout_index)
 
-		self.midiin = rtmidi.MidiIn()
+		self.midiin = rtmidi.MidiIn(rtapi=rtmidi.API_UNIX_JACK)
 		available_in_ports = self.midiin.get_ports()
 		print("available inports:")
 		print(available_in_ports)
