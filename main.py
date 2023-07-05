@@ -57,61 +57,59 @@ while running:
 
 		if event.type == pygame.KEYDOWN:
 			print(pygame.key.name(event.key))
-			match pygame.key.name(event.key):
-				case "f1":
-					ui_state = STATE_SCENE
-					preset.set_ui_state(STATE_SCENE)
-				case "f2":
-					ui_state = STATE_NAME_EDIT
-					preset.set_ui_state(STATE_NAME_EDIT)
+			key_name = pygame.key.name(event.key)
+			if key_name == "f1":
+				ui_state = STATE_SCENE
+				preset.set_ui_state(STATE_SCENE)
+			elif key_name == "f2":
+				ui_state = STATE_NAME_EDIT
+				preset.set_ui_state(STATE_NAME_EDIT)
 
 			if ui_state == STATE_SCENE:
-				match pygame.key.name(event.key):
-					case "left":
-						preset.left()
-					case "right":
-						preset.right()
-					case "up":
-						preset.up()
-					case "down":
-						preset.down()
-					case "space":
-						preset.toggle()
-					case "page up":
-						preset.inc()
-					case "page down":
-						preset.dec()
-					case "1":
-						preset.select_scene(0)
-					case "2":
-						preset.select_scene(1)
-					case "3":
-						preset.select_scene(2)
-					case "4":
-						preset.select_scene(3)
-					case "5":
-						preset.select_scene(4)
-					case "6":
-						preset.select_scene(5)
-					case "s":
-						preset.save_presets()
-					case "[+]":
-						if active_preset < 249:
-							active_preset += 1
-							preset.select_preset(active_preset)
-					case "[-]":
-						if active_preset > 0:
-							active_preset -= 1
-							preset.select_preset(active_preset)
-					case "c":
-						keys = pygame.key.get_pressed()
-						if keys[pygame.K_LCTRL]:
-							preset.copy_scene()
-					case "v":
-						keys = pygame.key.get_pressed()
-						if keys[pygame.K_LCTRL]:
-							preset.paste_scene()
-					
+				if key_name == "left":
+					preset.left()
+				elif key_name == "right":
+					preset.right()
+				elif key_name == "up":
+					preset.up()
+				elif key_name == "down":
+					preset.down()
+				elif key_name == "space":
+					preset.toggle()
+				elif key_name == "page up":
+					preset.inc()
+				elif key_name == "page down":
+					preset.dec()
+				elif key_name == "1":
+					preset.select_scene(0)
+				elif key_name == "2":
+					preset.select_scene(1)
+				elif key_name == "3":
+					preset.select_scene(2)
+				elif key_name == "4":
+					preset.select_scene(3)
+				elif key_name == "5":
+					preset.select_scene(4)
+				elif key_name == "6":
+					preset.select_scene(5)
+				elif key_name == "f12":
+					preset.save_presets()
+				elif key_name == "[+]":
+					if active_preset < 249:
+						active_preset += 1
+						preset.select_preset(active_preset)
+				elif key_name == "[-]":
+					if active_preset > 0:
+						active_preset -= 1
+						preset.select_preset(active_preset)
+				elif key_name == "c":
+					keys = pygame.key.get_pressed()
+					if keys[pygame.K_LCTRL]:
+						preset.copy_scene()
+				elif key_name == "v":
+					keys = pygame.key.get_pressed()
+					if keys[pygame.K_LCTRL]:
+						preset.paste_scene()
 
 			if ui_state == STATE_NAME_EDIT:
 				key_name = pygame.key.name(event.key)
