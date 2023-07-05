@@ -30,7 +30,7 @@ class Midi(singleton.SingletonClass):
 		self.midiout_index = -1
 		self.midiin_index = -1
 
-		self.midiout = rtmidi.MidiOut()
+		self.midiout = rtmidi.MidiOut(rtapi=rtmidi.API_UNIX_JACK)
 		available_out_ports = self.midiout.get_ports()
 		print("available outports:")
 		print(available_out_ports)
