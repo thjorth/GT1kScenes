@@ -32,6 +32,8 @@ class Midi(singleton.SingletonClass):
 
 		self.midiout = rtmidi.MidiOut()
 		available_out_ports = self.midiout.get_ports()
+		print("available outports:")
+		print(available_out_ports)
 		i = 0
 		found = False
 		while i < len(available_out_ports) and not found:
@@ -46,6 +48,8 @@ class Midi(singleton.SingletonClass):
 
 		self.midiin = rtmidi.MidiIn()
 		available_in_ports = self.midiin.get_ports()
+		print("available inports:")
+		print(available_in_ports)
 		i = 0
 		found = False
 		while i < len(available_in_ports) and not found:
