@@ -72,6 +72,7 @@ class Midi(singleton.SingletonClass):
 		# self.midiin.close()
 		# del self.midiout
 		# del self.midiin
+		pass
 
 	def respond(self):
 		#msg = self.midiin.get_message()
