@@ -7,6 +7,7 @@ import json
 import sys
 import mido
 
+mido.set_backend('mido.backends.pygame')
 outs = mido.get_output_names()
 print("outs: ", outs)
 
