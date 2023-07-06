@@ -45,12 +45,11 @@ class Midi(singleton.SingletonClass):
 		while i < len(available_out_ports) and not found:
 			if available_out_ports[i].startswith(MIDI_DEVICE):
 				self.midiout_index = i
+				print("out: ", available_out_ports[i])
+				self.midiout = mido.open_output(available_out_ports[i])
 				found = True
 			i += 1
-		if found:
-			print("out: ", available_out_ports[i])
-			self.midiout = mido.open_output(available_out_ports[i])
-		else:
+		if not found:
 			self.midiout = mido.open_output()
 
 		available_in_ports = mido.get_input_names()
@@ -60,12 +59,11 @@ class Midi(singleton.SingletonClass):
 		while i < len(available_in_ports) and not found:
 			if available_in_ports[i].startswith(MIDI_DEVICE):
 				self.midiin_index = i
+				print("in:  ", available_in_ports[i])
+				self.midiin = mido.open_input(available_in_ports[i])
 				found = True
 			i += 1
-		if found:
-			print("in:  ", available_in_ports[i])
-			self.midiin = mido.open_input(available_in_ports[i])
-		else:
+		if not found:
 			self.midin = mido.open_input()
 
 
