@@ -68,8 +68,8 @@ class Midi(singleton.SingletonClass):
 
 
 	def __del__(self):
-		self.midiout.close()
-		self.midiin.close()
+		# self.midiout.close()
+		# self.midiin.close()
 		# del self.midiout
 		# del self.midiin
 
