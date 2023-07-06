@@ -1,4 +1,5 @@
 import pygame
+import pygame.midi
 import time
 import models.scene
 import models.preset
