@@ -5,11 +5,6 @@ import models.preset
 import midi.midi
 import json
 import sys
-import mido
-
-mido.set_backend('mido.backends.pygame')
-outs = mido.get_output_names()
-print("outs: ", outs)
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 480
@@ -21,6 +16,7 @@ ui_state = STATE_SCENE
 
 pygame.init()
 pygame.font.init()
+pygame.midi.init()
 
 background_colour = (0, 0, 0)
 

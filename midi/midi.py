@@ -1,5 +1,12 @@
 import rtmidi
 import time
+
+import mido
+
+mido.set_backend('mido.backends.pygame')
+outs = mido.get_output_names()
+print("outs: ", outs)
+
 from rtmidi.midiconstants import (
     PROGRAM_CHANGE,
     CONTROL_CHANGE
@@ -24,10 +31,6 @@ MIDI_EXT_CHANNEL = 1
 
 index_to_cc_map = [71, 72, 73, 75, 76, 74, 77, 78, 79, 80]
 
-api = midiutil.get_api_from_environment()
-inputs = midiutil.list_input_ports(api=rtmidi.API_LINUX_ALSA)
-print("inputs: ", inputs)
-
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
@@ -36,11 +39,7 @@ class Midi(singleton.SingletonClass):
 		self.midiout_index = -1
 		self.midiin_index = -1
 
-		#self.midiout = rtmidi.MidiOut(rtapi=rtmidi.API_LINUX_ALSA)
-		self.midiout = rtmidi.MidiOut()
-		available_out_ports = self.midiout.get_ports()
-		print("available outports:")
-		print(available_out_ports)
+		available_out_ports = mido.get_output_names()
 		i = 0
 		found = False
 		while i < len(available_out_ports) and not found:
@@ -48,16 +47,14 @@ class Midi(singleton.SingletonClass):
 				self.midiout_index = i
 				found = True
 			i += 1
+		if found:
+			print("out: ", available_out_ports[i])
+			self.midiout = mido.open_output(available_out_ports[i])
+		else:
+			self.midiout = mido.open_output()
 
-		if (self.midiout_index >= 0):
-			print("MIDI out:", available_out_ports[self.midiout_index])
-			self.midiout.open_port(self.midiout_index)
-
-		#self.midiin = rtmidi.MidiIn(rtapi=rtmidi.API_LINUX_ALSA)
-		self.midiin = rtmidi.MidiIn()
-		available_in_ports = self.midiin.get_ports()
-		print("available inports:")
-		print(available_in_ports)
+		available_in_ports = mido.get_input_names()
+		print("ins: ", available_in_ports)
 		i = 0
 		found = False
 		while i < len(available_in_ports) and not found:
@@ -65,17 +62,16 @@ class Midi(singleton.SingletonClass):
 				self.midiin_index = i
 				found = True
 			i += 1
-
-		if (self.midiin_index >= 0):
-			print("MIDI in:", available_in_ports[self.midiin_index])
-			self.midiin.open_port(self.midiin_index)
-
-		print("(PROGRAM_CHANGE | MIDI_SCENE_SELECT_CHANNEL):", (PROGRAM_CHANGE | MIDI_SCENE_SELECT_CHANNEL))
+		if found:
+			print("in:  ", available_in_ports[i])
+			self.midiin = mido.open_input(available_in_ports[i])
+		else:
+			self.midin = mido.open_input()
 
 
 	def __del__(self):
-		self.midiout.close_port()
-		self.midiin.close_port()
+		self.midiout.close()
+		self.midiin.close()
 		del self.midiout
 		del self.midiin
 
