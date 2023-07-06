@@ -4,6 +4,8 @@ from rtmidi.midiconstants import (
     PROGRAM_CHANGE,
     CONTROL_CHANGE
 )
+from rtmidi import midiutil
+
 import singleton
 
 MIDI_DEVICE = "UM-ONE"
@@ -22,6 +24,8 @@ MIDI_EXT_CHANNEL = 1
 
 index_to_cc_map = [71, 72, 73, 75, 76, 74, 77, 78, 79, 80]
 
+api = midiutil.get_api_from_environment()
+print("api: ", api)
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
