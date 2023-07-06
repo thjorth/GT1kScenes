@@ -5,6 +5,10 @@ import models.preset
 import midi.midi
 import json
 import sys
+import mido
+
+outs = mido.get_output_names()
+print("outs: ", outs)
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 480

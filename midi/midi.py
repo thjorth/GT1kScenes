@@ -27,6 +27,7 @@ index_to_cc_map = [71, 72, 73, 75, 76, 74, 77, 78, 79, 80]
 api = midiutil.get_api_from_environment()
 inputs = midiutil.list_input_ports(api=rtmidi.API_LINUX_ALSA)
 print("inputs: ", inputs)
+
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
