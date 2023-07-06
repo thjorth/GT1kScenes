@@ -110,51 +110,60 @@ class Midi(singleton.SingletonClass):
 		# volume
 		if (not old_scene or old_scene.vol != scene.vol) and scene.vol != -1:
 			vol = scene.vol + 20
-			self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+			self.midiout.send(msg)
 			time.sleep(0.01)
 
 		# cc1
 		if (not old_scene or old_scene.cc1 != scene.cc1) and scene.cc1 != -1:
-			self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=scene.cc1)
+			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=scene.cc1)
+			self.midiout.send(msg)
 			time.sleep(0.01)			
 
 		# cc2
 		if (not old_scene or old_scene.cc2 != scene.cc2) and scene.cc2 != -1:
-			self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=scene.cc2)
+			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=scene.cc2)
+			self.midiout.send(msg)
 			time.sleep(0.01)
 
 		# External PC (for switching ToneX presets)
 		if (not old_scene or old_scene.ext_pc != scene.ext_pc) and scene.ext_pc != -1:
-			self.midiout.send('program_change', channel=MIDI_EFFECTS_CHANNEL, program=scene.ext_pc)
+			msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=scene.ext_pc)
+			self.midiout.send(msg)
 			time.sleep(0.01)
 
 	def output_effect(self, effect):
 		val = 0
 		if effect.enabled:
 			val = 127
-		self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
+		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
+		self.midiout.send(msg)
 		time.sleep(0.01)
 
 	def output_volume(self, volume):
 		vol = volume.value + 20
-		self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+		self.midiout.send(msg)
 		time.sleep(0.01)
 
 	def output_cc(self, cc):
 		if cc.value >= 0 and cc.value < 128:
 			if cc.id == "cc1":
-				self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=cc.value)
+				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=cc.value)
 			elif cc.id == "cc2":
-				self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=cc.value)
+				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=cc.value)
 			elif cc.id == "ext_cc":
-				self.midiout.send('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_EXT, value=cc.value)
+				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_EXT, value=cc.value)
+
+			if msg:
+				self.midiout.send(msg)
 			time.sleep(0.01)
 
 	def output_pc(self, pc):
 		if pc.value >= 0 and pc.value < 128:
-			msg = None
 			if pc.id == "ext_pc":
-				self.midiout.send('program_change', channel=MIDI_EFFECTS_CHANNEL, program=pc.value)
+				msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=pc.value)
+				self.midiout.send(msg)
 
 			
 					
