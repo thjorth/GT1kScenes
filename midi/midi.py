@@ -74,7 +74,8 @@ class Midi(singleton.SingletonClass):
 		del self.midiin
 
 	def respond(self):
-		msg = self.midiin.get_message()
+		#msg = self.midiin.get_message()
+		msg = None
 		if msg:
 			message, deltatime = msg
 			self.timer += deltatime
