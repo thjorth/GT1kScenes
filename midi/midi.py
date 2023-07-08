@@ -16,6 +16,7 @@ from rtmidi import midiutil
 import singleton
 
 MIDI_DEVICE = "UM-ONE"
+SCENE_CHANGE_DEVICE = "SparkFun"
 EFFECT_CC_START = 71
 CC_VOL = 81
 CC1 = 82
@@ -54,17 +55,16 @@ class Midi(singleton.SingletonClass):
 
 		available_in_ports = mido.get_input_names()
 		print("ins: ", available_in_ports)
+		self.scene_selector_midiin = None
 		i = 0
-		found = False
-		while i < len(available_in_ports) and not found:
+		while i < len(available_in_ports):
 			if available_in_ports[i].startswith(MIDI_DEVICE):
 				self.midiin_index = i
 				print("in:  ", available_in_ports[i])
 				self.midiin = mido.open_input(available_in_ports[i])
-				found = True
+			if available_in_ports[i].startswith(SCENE_CHANGE_DEVICE):
+				self.scene_selector_midiin = mido.open_input(available_in_ports[i])
 			i += 1
-		if not found:
-			self.midin = mido.open_input()
 
 
 	def __del__(self):
@@ -74,20 +74,27 @@ class Midi(singleton.SingletonClass):
 		# del self.midiin
 		pass
 
-	def respond(self):
-		#msg = self.midiin.get_message()
-		msg = None
-		if msg:
-			message, deltatime = msg
-			self.timer += deltatime
-			print("@%0.6f %r" % (self.timer, message))
-			# now write these messages to the midi out to allow midi to pass through
-			self.midiout.send_message(message)
+	def send(self, msg):
+		if not self.midiout.closed:
+			self.midiout.send(msg)
 
-			# now check if we need to do something with the incoming message
-			if message[0] == (PROGRAM_CHANGE | MIDI_EFFECTS_CHANNEL):
-				self.preset.select_scene(message[1])
-				return True
+	def respond(self):
+		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
+		msg = self.midiin.poll()
+		if msg:
+			# now write these messages to the midi out to allow midi to pass through
+			self.send(msg)
+
+			# check if there is a PC on channel 0. If there is, then switch to another preset
+			if msg.type == "program_change" and msg.channel == 0:
+				self.preset.select_preset(msg.program)
+
+		# now check the scene selector midi in to see if there is something that needs to be handled
+		pc = self.scene_selector_midiin.poll()
+		if pc:
+			# select a new scene
+			self.preset.select_scene(pc.program)
+
 		return False
 
 	def set_preset(self, preset):
@@ -96,7 +103,7 @@ class Midi(singleton.SingletonClass):
 	def output_scene(self, scene, old_scene):
 		i = 0
 		print("old_scene:", old_scene)
-		print("scene:")
+		print("scene:", scene)
 
 		# effects on/off
 		while i < NUMBER_OF_EFFECTS:
@@ -105,7 +112,7 @@ class Midi(singleton.SingletonClass):
 				val = 127
 			
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
-				self.midiout.send(mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val))
+				self.send(mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val))
 				time.sleep(0.01)
 			i += 1
 
@@ -113,25 +120,25 @@ class Midi(singleton.SingletonClass):
 		if (not old_scene or old_scene.vol != scene.vol) and scene.vol != -1:
 			vol = scene.vol + 20
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
-			self.midiout.send(msg)
+			self.send(msg)
 			time.sleep(0.01)
 
 		# cc1
 		if (not old_scene or old_scene.cc1 != scene.cc1) and scene.cc1 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=scene.cc1)
-			self.midiout.send(msg)
+			self.send(msg)
 			time.sleep(0.01)			
 
 		# cc2
 		if (not old_scene or old_scene.cc2 != scene.cc2) and scene.cc2 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=scene.cc2)
-			self.midiout.send(msg)
+			self.send(msg)
 			time.sleep(0.01)
 
 		# External PC (for switching ToneX presets)
 		if (not old_scene or old_scene.ext_pc != scene.ext_pc) and scene.ext_pc != -1:
 			msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=scene.ext_pc)
-			self.midiout.send(msg)
+			self.send(msg)
 			time.sleep(0.01)
 
 	def output_effect(self, effect):
@@ -139,13 +146,13 @@ class Midi(singleton.SingletonClass):
 		if effect.enabled:
 			val = 127
 		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
-		self.midiout.send(msg)
+		self.send(msg)
 		time.sleep(0.01)
 
 	def output_volume(self, volume):
 		vol = volume.value + 20
 		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
-		self.midiout.send(msg)
+		self.send(msg)
 		time.sleep(0.01)
 
 	def output_cc(self, cc):
@@ -158,14 +165,14 @@ class Midi(singleton.SingletonClass):
 				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_EXT, value=cc.value)
 
 			if msg:
-				self.midiout.send(msg)
+				self.send(msg)
 			time.sleep(0.01)
 
 	def output_pc(self, pc):
 		if pc.value >= 0 and pc.value < 128:
 			if pc.id == "ext_pc":
 				msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=pc.value)
-				self.midiout.send(msg)
+				self.send(msg)
 
 			
 					

@@ -5,6 +5,7 @@ import widgets.volumeWidget
 import widgets.ccWidget
 import widgets.pcWidget
 from data.presetsFile import PresetsFile
+import pygame
 
 STATE_SCENE = 1
 STATE_NAME_EDIT = 2
@@ -13,6 +14,8 @@ import fonts.fonts
 
 NUMBER_OF_SCENES = 6
 SEPARATOR = "::"
+
+BACKGROUND_COLOR = (0, 0, 0)
 
 COLOR_COMP = (102, 194, 255)
 COLOR_GREEN = (0, 255, 0)
@@ -104,12 +107,14 @@ class Preset():
 		self.deserialize(self.presets_file.get_active_preset())
 		self.load_scene()
 
+ 
 	def update_preset(self):
 		self.presets_file.update_active_preset(self.serialize())
 
 	def load_scene(self):
 		self.active_scene = self.scenes[self.index]
 		self.init_from_scene(self.active_scene)
+		self.render()
 
 	def init_from_scene(self, scene):
 		self.effects_widget.init_from_scene(scene)
@@ -121,10 +126,14 @@ class Preset():
 		self.render()
 
 	def render(self):
+		self.screen.fill(BACKGROUND_COLOR)
 		if self.ui_state == STATE_SCENE:
 			self.render_scene()
 		elif self.ui_state == STATE_NAME_EDIT:
 			self.render_name_editor()
+		pygame.display.flip()
+		
+		
 
 	def render_name_editor(self):
 		# implement
@@ -182,6 +191,8 @@ class Preset():
 
 
 	def select_scene(self, index):
+		print("selecting scene:", index)
+		print("self:", self)
 		if index >= 0 and index < len(self.scenes):
 			self.index = index
 			self.load_scene()

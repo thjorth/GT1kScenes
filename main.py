@@ -4,7 +4,6 @@ import time
 import models.scene
 import models.preset
 import midi.midi
-import json
 import sys
 
 WIN_WIDTH = 800
@@ -34,10 +33,7 @@ pygame.display.flip()
 running = True
 
 def render():
-	screen.fill(background_colour)
 	preset.render()
-
-	pygame.display.flip()
 
 midi = midi.midi.Midi()
 preset = models.preset.Preset(midi, screen)
