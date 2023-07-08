@@ -90,6 +90,7 @@ class Preset():
 	def select_preset(self, index):
 		self.presets_file.select_preset(index)
 		self.reset()
+		self.midi.output_scene(self.active_scene, self.old_scene)
 
 	def reset(self):
 		self.old_scene = None
