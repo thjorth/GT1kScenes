@@ -137,7 +137,7 @@ class Midi(singleton.SingletonClass):
 
 		# External PC (for switching ToneX presets)
 		if (not old_scene or old_scene.ext_pc != scene.ext_pc) and scene.ext_pc != -1:
-			msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=scene.ext_pc)
+			msg = mido.Message('program_change', channel=MIDI_EXT_CHANNEL, program=scene.ext_pc)
 			self.send(msg)
 			time.sleep(0.01)
 
@@ -171,7 +171,7 @@ class Midi(singleton.SingletonClass):
 	def output_pc(self, pc):
 		if pc.value >= 0 and pc.value < 128:
 			if pc.id == "ext_pc":
-				msg = mido.Message('program_change', channel=MIDI_EFFECTS_CHANNEL, program=pc.value)
+				msg = mido.Message('program_change', channel=MIDI_EXT_CHANNEL, program=pc.value)
 				self.send(msg)
 
 			
