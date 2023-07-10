@@ -21,3 +21,8 @@ static domain_name_servers=192.168.8.1 8.8.8.8
 # enabling the Hyper Pixel display
 dtoverlay=vc4-kms-dpi-hyperpixel4
 dtparam=rotate=270
+
+
+/etc/xdg/lxsession/LXDE-pi/autostart
+
+@sh <path to a shell scritp that changes to the project dir and runs "python main.py --fullscreen">
