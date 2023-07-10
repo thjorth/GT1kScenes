@@ -83,6 +83,14 @@ class EffectsArrayWidget():
 		effect.dec()
 		self.change_callback(effect)
 
+	def inc_volume(self):
+		self.volume.inc()
+		self.change_callback(self.volume)
+
+	def dec_volume(self):
+		self.volume.dec()
+		self.change_callback(self.volume)
+
 	def set_selected(self):
 		self.reset_selected()
 		self.effects[self.x + self.y * ARRAY_WIDTH].select()

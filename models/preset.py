@@ -240,6 +240,12 @@ class Preset():
 	def dec(self):
 		self.effects_widget.dec()
 
+	def inc_volume(self):
+		self.effects_widget.inc_volume()
+
+	def dec_volume(self):
+		self.effects_widget.dec_volume()
+
 	def edit_backspace(self):
 		name = self.name.replace("\n", "")
 		if len(name) > 0:

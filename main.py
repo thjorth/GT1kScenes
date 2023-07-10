@@ -97,13 +97,9 @@ while running:
 				elif key_name == "f12":
 					preset.save_presets()
 				elif key_name == "[+]":
-					if active_preset < 249:
-						active_preset += 1
-						preset.select_preset(active_preset)
+					preset.inc_volume()
 				elif key_name == "[-]":
-					if active_preset > 0:
-						active_preset -= 1
-						preset.select_preset(active_preset)
+					preset.dec_volume()
 				elif key_name == "c":
 					keys = pygame.key.get_pressed()
 					if keys[pygame.K_LCTRL]:
