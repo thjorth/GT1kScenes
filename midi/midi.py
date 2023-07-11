@@ -1,6 +1,6 @@
 import rtmidi
 import time
-
+from midi.dummy import Dummy
 import mido
 
 mido.set_backend('mido.backends.pygame')
@@ -8,8 +8,8 @@ outs = mido.get_output_names()
 print("outs: ", outs)
 
 from rtmidi.midiconstants import (
-    PROGRAM_CHANGE,
-    CONTROL_CHANGE
+	PROGRAM_CHANGE,
+	CONTROL_CHANGE
 )
 from rtmidi import midiutil
 
@@ -43,6 +43,7 @@ class Midi(singleton.SingletonClass):
 		available_out_ports = mido.get_output_names()
 		i = 0
 		found = False
+		self.midiout = None
 		while i < len(available_out_ports) and not found:
 			if available_out_ports[i].startswith(MIDI_DEVICE):
 				self.midiout_index = i
@@ -50,12 +51,11 @@ class Midi(singleton.SingletonClass):
 				self.midiout = mido.open_output(available_out_ports[i])
 				found = True
 			i += 1
-		if not found:
-			self.midiout = mido.open_output()
 
 		available_in_ports = mido.get_input_names()
 		print("ins: ", available_in_ports)
 		self.scene_selector_midiin = None
+		self.midiin = None
 		i = 0
 		while i < len(available_in_ports):
 			if available_in_ports[i].startswith(MIDI_DEVICE):
@@ -66,6 +66,10 @@ class Midi(singleton.SingletonClass):
 				self.scene_selector_midiin = mido.open_input(available_in_ports[i])
 			i += 1
 
+		if not self.midiin:
+			self.midiin = Dummy()
+		if not self.scene_selector_midiin:
+			self.scene_selector_midiin = Dummy()
 
 	def __del__(self):
 		# self.midiout.close()
@@ -75,7 +79,7 @@ class Midi(singleton.SingletonClass):
 		pass
 
 	def send(self, msg):
-		if not self.midiout.closed:
+		if self.midiout and not self.midiout.closed:
 			self.midiout.send(msg)
 
 	def respond(self):
@@ -88,6 +92,10 @@ class Midi(singleton.SingletonClass):
 			# check if there is a PC on channel 0. If there is, then switch to another preset
 			if msg.type == "program_change" and msg.channel == 0:
 				self.preset.select_preset(msg.program)
+
+			if msg.type == "control_change" and msg.channel == 0:
+				print(msg)
+
 
 		# now check the scene selector midi in to see if there is something that needs to be handled
 		pc = self.scene_selector_midiin.poll()
@@ -112,7 +120,8 @@ class Midi(singleton.SingletonClass):
 				val = 127
 			
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
-				self.send(mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val))
+				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val)
+				self.send(msg)
 				time.sleep(0.01)
 			i += 1
 
