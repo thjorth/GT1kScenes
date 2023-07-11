@@ -93,8 +93,8 @@ class Midi(singleton.SingletonClass):
 			if msg.type == "program_change" and msg.channel == 0:
 				self.preset.select_preset(msg.program)
 
-			if msg.type == "control_change" and msg.channel == 0:
-				print(msg)
+			if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
+				self.preset.select_scene(msg.control - 1)
 
 
 		# now check the scene selector midi in to see if there is something that needs to be handled
