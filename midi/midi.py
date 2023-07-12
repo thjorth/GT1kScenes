@@ -32,6 +32,20 @@ MIDI_EXT_CHANNEL = 1
 
 index_to_cc_map = [71, 72, 73, 75, 76, 74, 77, 78, 79, 80]
 
+index_to_fx_name_map = ['comp', 'dist1', 'dist2', 'mdelay', 'delay', 'chorus', 'fx1', 'fx2', 'fx3', 'fx4']
+fx_sysx_map = {
+	'comp':		('F0 41 00 00 00 00 4F 12 10 00 22 00 01 4D F7', 'F0 41 00 00 00 00 4F 12 10 00 22 00 00 4E F7'),	
+	'dist1':	('F0 41 00 00 00 00 4F 12 10 00 13 00 01 5C F7', 'F0 41 00 00 00 00 4F 12 10 00 13 00 00 5D F7'),
+	'dist2':	('F0 41 00 00 00 00 4F 12 10 00 14 00 01 5B F7', 'F0 41 00 00 00 00 4F 12 10 00 14 00 00 5C F7'),
+	'mdelay':	('F0 41 00 00 00 00 4F 12 10 00 21 00 01 4E F7', 'F0 41 00 00 00 00 4F 12 10 00 21 00 00 4F F7'),
+	'delay':	('F0 41 00 00 00 00 4F 12 10 00 1D 00 01 52 F7', 'F0 41 00 00 00 00 4F 12 10 00 1D 00 00 53 F7'),
+	'chorus':	('F0 41 00 00 00 00 4F 12 10 00 22 00 01 4D F7', 'F0 41 00 00 00 00 4F 12 10 00 22 00 00 4E F7'),
+	'fx1':		('F0 41 00 00 00 00 4F 12 10 00 23 00 01 4C F7', 'F0 41 00 00 00 00 4F 12 10 00 23 00 00 4D F7'),
+	'fx2':		('F0 41 00 00 00 00 4F 12 10 00 3E 00 01 31 F7', 'F0 41 00 00 00 00 4F 12 10 00 3E 00 00 32 F7'),
+	'fx3':		('F0 41 00 00 00 00 4F 12 10 00 59 00 01 16 F7', 'F0 41 00 00 00 00 4F 12 10 00 59 00 00 17 F7'),
+	'fx4':		('F0 41 00 00 00 00 4F 12 10 02 01 00 01 6C F7', 'F0 41 00 00 00 00 4F 12 10 02 01 00 00 6D F7'),
+}
+
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
@@ -120,7 +134,12 @@ class Midi(singleton.SingletonClass):
 				val = 127
 			
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
-				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val)
+				fxname = index_to_fx_name_map[i]
+				if scene.effects[i]:
+					msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
+				else:
+					msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
+				#msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val)
 				self.send(msg)
 				time.sleep(0.01)
 			i += 1
