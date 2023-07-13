@@ -112,18 +112,22 @@ class Midi(singleton.SingletonClass):
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
 		msg = self.midiin.poll()
-		if msg and msg.type != "sysex":
+		if msg:
 			print(msg)
-			# now write these messages to the midi out to allow midi to pass through if it was not transmitted on channel 0
-			self.send(msg)
+			if msg.type != "sysex":
+				# now write these messages to the midi out to allow midi to pass through if it was not transmitted on channel 0
+				self.send(msg)
 
-			# check if there is a PC on channel 0. If there is, then switch to another preset
-			if msg.type == "program_change" and msg.channel == 0:
-				self.preset.select_preset(msg.program)
+				# check if there is a PC on channel 0. If there is, then switch to another preset
+				if msg.type == "program_change" and msg.channel == 0:
+					self.preset.select_preset(msg.program)
 
-			if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
-				self.preset.select_scene(msg.control - 1)
+				if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
+					self.preset.select_scene(msg.control - 1)
 
+			if self.is_patch_change_sysex(msg):
+				# The program number is hidden in msg.data[12]
+				self.preset.select_preset(msg.data[12])
 
 		# now check the scene selector midi in to see if there is something that needs to be handled
 		pc = self.scene_selector_midiin.poll()
@@ -131,6 +135,19 @@ class Midi(singleton.SingletonClass):
 			# select a new scene
 			self.preset.select_scene(pc.program)
 
+		return False
+
+	def is_patch_change_sysex(self, msg):
+		# example patch change sysex: 
+		# 65,0,0,0,0,79,18,127,0,1,0,0,1,127
+		if msg.type != "sysex":
+			return False
+		if len(msg.data) != 14:
+			return False
+		d = msg.data
+		if d[0] == 0x41 and d[5] == 0x4F and d[6] == 0x12 and d[7] == 0x7F and d[8] == 0x0 and d[9] == 0x1 and d[10] == 0x0 and d[11] == 0x0:
+			return True
+		
 		return False
 
 	def set_preset(self, preset):
