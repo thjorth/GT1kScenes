@@ -2,6 +2,9 @@ import rtmidi
 import time
 from midi.dummy import Dummy
 import mido
+from data.config import Config
+
+CONFIG = Config()
 
 mido.set_backend('mido.backends.pygame')
 outs = mido.get_output_names()
@@ -15,8 +18,8 @@ from rtmidi import midiutil
 
 import singleton
 
-MIDI_DEVICE = "UM-ONE"
-SCENE_CHANGE_DEVICE = "SparkFun"
+MIDI_DEVICE = CONFIG.main_midi_device
+SCENE_CHANGE_DEVICE = CONFIG.scene_select_midi_device
 EFFECT_CC_START = 71
 CC_VOL = 81
 CC1 = 82
@@ -46,6 +49,9 @@ fx_sysx_map = {
 	'fx4':		('F0 41 00 00 00 00 4F 12 10 02 01 00 01 6C F7', 'F0 41 00 00 00 00 4F 12 10 02 01 00 00 6D F7'),
 }
 
+TUNER_ON = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 01 7E F7'
+TUNER_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 00 7F F7'
+
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
@@ -56,14 +62,12 @@ class Midi(singleton.SingletonClass):
 
 		available_out_ports = mido.get_output_names()
 		i = 0
-		found = False
 		self.midiout = None
-		while i < len(available_out_ports) and not found:
-			if available_out_ports[i].startswith(MIDI_DEVICE):
+		while i < len(available_out_ports):
+			if available_out_ports[i].startswith(MIDI_DEVICE) and not self.midiout:
 				self.midiout_index = i
 				print("out: ", available_out_ports[i])
 				self.midiout = mido.open_output(available_out_ports[i])
-				found = True
 			i += 1
 
 		available_in_ports = mido.get_input_names()
@@ -72,11 +76,11 @@ class Midi(singleton.SingletonClass):
 		self.midiin = None
 		i = 0
 		while i < len(available_in_ports):
-			if available_in_ports[i].startswith(MIDI_DEVICE):
+			if available_in_ports[i].startswith(MIDI_DEVICE) and not self.midiin:
 				self.midiin_index = i
 				print("in:  ", available_in_ports[i])
 				self.midiin = mido.open_input(available_in_ports[i])
-			if available_in_ports[i].startswith(SCENE_CHANGE_DEVICE):
+			if available_in_ports[i].startswith(SCENE_CHANGE_DEVICE) and not self.scene_selector_midiin:
 				self.scene_selector_midiin = mido.open_input(available_in_ports[i])
 			i += 1
 
@@ -94,13 +98,19 @@ class Midi(singleton.SingletonClass):
 
 	def send(self, msg):
 		if self.midiout and not self.midiout.closed:
+			print(msg)
+			if (msg.type == "sysex"):
+				edit_mode_msg = mido.Message.from_hex('F0 41 00 00 00 00 4F 12 7F 00 00 02 00 7F F7')
+				self.midiout.send(edit_mode_msg)
+
 			self.midiout.send(msg)
 
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
 		msg = self.midiin.poll()
-		if msg:
-			# now write these messages to the midi out to allow midi to pass through
+		if msg and msg.type != "sysex":
+			print(msg)
+			# now write these messages to the midi out to allow midi to pass through if it was not transmitted on channel 0
 			self.send(msg)
 
 			# check if there is a PC on channel 0. If there is, then switch to another preset
@@ -129,9 +139,9 @@ class Midi(singleton.SingletonClass):
 
 		# effects on/off
 		while i < NUMBER_OF_EFFECTS:
-			val = 0
-			if scene.effects[i]:
-				val = 127
+			# val = 0
+			# if scene.effects[i]:
+			# 	val = 127
 			
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
 				fxname = index_to_fx_name_map[i]
@@ -147,6 +157,7 @@ class Midi(singleton.SingletonClass):
 		# volume
 		if (not old_scene or old_scene.vol != scene.vol) and scene.vol != -1:
 			vol = scene.vol + 20
+			# TODO: build volume sysex here!
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
 			self.send(msg)
 			time.sleep(0.01)
@@ -170,10 +181,16 @@ class Midi(singleton.SingletonClass):
 			time.sleep(0.01)
 
 	def output_effect(self, effect):
-		val = 0
+		# val = 0
+		# if effect.enabled:
+		# 	val = 127
+		fxname = index_to_fx_name_map[effect.index]
 		if effect.enabled:
-			val = 127
-		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
+			msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
+		else:
+			msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
+
+		#msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
 		self.send(msg)
 		time.sleep(0.01)
 

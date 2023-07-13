@@ -24,6 +24,7 @@ window_style = 0
 if "--fullscreen" in sys.argv:
 	window_style = pygame.FULLSCREEN
 
+
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), window_style)
 pygame.display.set_caption('GT-1000 Scenes')
 screen.fill(background_colour)
