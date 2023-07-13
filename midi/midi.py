@@ -100,7 +100,7 @@ class Midi(singleton.SingletonClass):
 		if self.midiout and not self.midiout.closed:
 			print(msg)
 			if (msg.type == "sysex"):
-				edit_mode_msg = mido.Message.from_hex('F0 41 00 00 00 00 4F 11 7F 00 00 00 00 00 00 01 00 F7')
+				edit_mode_msg = mido.Message.from_hex('F0 41 00 00 00 00 4F 12 7F 00 00 01 01 7F F7')
 				self.midiout.send(edit_mode_msg)
 
 			self.midiout.send(msg)
