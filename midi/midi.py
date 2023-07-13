@@ -52,6 +52,18 @@ fx_sysx_map = {
 TUNER_ON = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 01 7E F7'
 TUNER_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 00 7F F7'
 
+# MAYBE edit mode on/off
+EDIT_MODE_ON  = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 01 7F F7'
+EDIT_MODE_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 00 7F F7'
+
+# EQ 3 level
+# F0 41 00 00 00 00 4F 12 10 00 1B 04 0C 45 F7 (-20 dB)
+# F0 41 00 00 00 00 4F 12 10 00 1B 04 0D 44 F7 (-19 dB)
+# F0 41 00 00 00 00 4F 12 10 00 1B 04 20 31 F7 (  0 dB)
+# F0 41 00 00 00 00 4F 12 10 00 1B 04 21 30 F7 ( +1 dB)
+# 
+
+
 class Midi(singleton.SingletonClass):
 	def __init__(self):
 		self.timer = time.time()
@@ -177,9 +189,10 @@ class Midi(singleton.SingletonClass):
 
 		# volume
 		if (not old_scene or old_scene.vol != scene.vol) and scene.vol != -1:
-			vol = scene.vol + 20
-			# TODO: build volume sysex here!
-			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+			sysex_vol = 0x0C + scene.vol + 20
+			checksum = 81 - sysex_vol
+			data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
+			msg = mido.Message.from_hex(data)
 			self.send(msg)
 			time.sleep(0.01)
 
@@ -216,8 +229,10 @@ class Midi(singleton.SingletonClass):
 		time.sleep(0.01)
 
 	def output_volume(self, volume):
-		vol = volume.value + 20
-		msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_VOL, value=vol)
+		sysex_vol = 0x0C + volume.value + 20
+		checksum = 81 - sysex_vol
+		data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
+		msg = mido.Message.from_hex(data)
 		self.send(msg)
 		time.sleep(0.01)
 
