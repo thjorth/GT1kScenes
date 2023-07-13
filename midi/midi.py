@@ -118,12 +118,12 @@ class Midi(singleton.SingletonClass):
 				# now write these messages to the midi out to allow midi to pass through if it was not transmitted on channel 0
 				self.send(msg)
 
-				# check if there is a PC on channel 0. If there is, then switch to another preset
-				if msg.type == "program_change" and msg.channel == 0:
-					self.preset.select_preset(msg.program)
+			# check if there is a PC on channel 0. If there is, then switch to another preset
+			if msg.type == "program_change" and msg.channel == 0:
+				self.preset.select_preset(msg.program)
 
-				if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
-					self.preset.select_scene(msg.control - 1)
+			if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
+				self.preset.select_scene(msg.control - 1)
 
 			if self.is_patch_change_sysex(msg):
 				# The program number is hidden in msg.data[12]
