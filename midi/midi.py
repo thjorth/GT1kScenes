@@ -119,10 +119,10 @@ class Midi(singleton.SingletonClass):
 			self.midiout.send(msg)
 			time.sleep(0.1)
 
-			if (msg.type == "sysex"):
-				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
-				self.midiout.send(edit_mode_msg)
-				time.sleep(0.1)
+			# if (msg.type == "sysex"):
+			# 	edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
+			# 	self.midiout.send(edit_mode_msg)
+			# 	time.sleep(0.1)
 
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
