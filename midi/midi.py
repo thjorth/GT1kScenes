@@ -54,7 +54,7 @@ TUNER_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 00 7F F7'
 
 # MAYBE edit mode on/off
 EDIT_MODE_ON  = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 01 7F F7'
-EDIT_MODE_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 00 80 F7'
+EDIT_MODE_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 00 00 F7'
 
 # EQ 3 level
 # F0 41 00 00 00 00 4F 12 10 00 1B 04 0C 45 F7 (-20 dB)
@@ -114,12 +114,15 @@ class Midi(singleton.SingletonClass):
 			if (msg.type == "sysex"):
 				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
 				self.midiout.send(edit_mode_msg)
+				time.sleep(0.01)
 
 			self.midiout.send(msg)
+			time.sleep(0.01)
 
 			if (msg.type == "sysex"):
 				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
 				self.midiout.send(edit_mode_msg)
+				time.sleep(0.01)
 
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
