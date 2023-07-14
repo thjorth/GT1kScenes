@@ -114,6 +114,7 @@ class Midi(singleton.SingletonClass):
 		time.sleep(0.1)
 
 	def edit_mode_off(self):
+		time.sleep(0.2)
 		edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
 		self.midiout.send(edit_mode_msg)
 		time.sleep(0.1)
