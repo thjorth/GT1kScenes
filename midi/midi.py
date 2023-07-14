@@ -54,7 +54,7 @@ TUNER_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 02 00 7F F7'
 
 # MAYBE edit mode on/off
 EDIT_MODE_ON  = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 01 7F F7'
-EDIT_MODE_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 00 7F F7'
+EDIT_MODE_OFF = 'F0 41 00 00 00 00 4F 12 7F 00 00 01 00 80 F7'
 
 # EQ 3 level
 # F0 41 00 00 00 00 4F 12 10 00 1B 04 0C 45 F7 (-20 dB)
@@ -110,16 +110,16 @@ class Midi(singleton.SingletonClass):
 
 	def send(self, msg):
 		if self.midiout and not self.midiout.closed:
-			#print(msg)
-			# if (msg.type == "sysex"):
-			# 	edit_mode_msg = mido.Message.from_hex('F0 41 00 00 00 00 4F 12 7F 00 00 01 01 7F F7')
-			# 	self.midiout.send(edit_mode_msg)
+			print(msg)
+			if (msg.type == "sysex"):
+				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
+				self.midiout.send(edit_mode_msg)
 
 			self.midiout.send(msg)
 
-			# if (msg.type == "sysex"):
-			# 	edit_mode_msg = mido.Message.from_hex('F0 41 00 00 00 00 4F 12 7F 00 00 01 00 7F F7')
-			# 	self.midiout.send(edit_mode_msg)
+			if (msg.type == "sysex"):
+				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
+				self.midiout.send(edit_mode_msg)
 
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
@@ -172,17 +172,12 @@ class Midi(singleton.SingletonClass):
 
 		# effects on/off
 		while i < NUMBER_OF_EFFECTS:
-			# val = 0
-			# if scene.effects[i]:
-			# 	val = 127
-			
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
 				fxname = index_to_fx_name_map[i]
 				if scene.effects[i]:
 					msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
 				else:
 					msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
-				#msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[i], value=val)
 				self.send(msg)
 				time.sleep(0.01)
 			i += 1
@@ -215,16 +210,11 @@ class Midi(singleton.SingletonClass):
 			time.sleep(0.01)
 
 	def output_effect(self, effect):
-		# val = 0
-		# if effect.enabled:
-		# 	val = 127
 		fxname = index_to_fx_name_map[effect.index]
 		if effect.enabled:
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
 		else:
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
-
-		#msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=index_to_cc_map[effect.index], value=val)
 		self.send(msg)
 		time.sleep(0.01)
 
