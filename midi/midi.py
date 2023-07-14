@@ -108,21 +108,22 @@ class Midi(singleton.SingletonClass):
 		# del self.midiin
 		pass
 
+	def edit_mode_on(self):
+		edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
+		self.midiout.send(edit_mode_msg)
+		time.sleep(0.1)
+
+	def edit_mode_off(self):
+		edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
+		self.midiout.send(edit_mode_msg)
+		time.sleep(0.1)
+
+
 	def send(self, msg):
 		if self.midiout and not self.midiout.closed:
 			print(msg)
-			if (msg.type == "sysex"):
-				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
-				self.midiout.send(edit_mode_msg)
-				time.sleep(0.1)
-
 			self.midiout.send(msg)
-			time.sleep(0.1)
-
-			# if (msg.type == "sysex"):
-			# 	edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
-			# 	self.midiout.send(edit_mode_msg)
-			# 	time.sleep(0.1)
+			time.sleep(0.01)
 
 	def respond(self):
 		# First respond to the messages coming in on the normal midi in and make sure that they are sent through to midiout
@@ -173,6 +174,7 @@ class Midi(singleton.SingletonClass):
 		print("old_scene:", old_scene)
 		print("scene:", scene)
 
+		self.edit_mode_on()
 		# effects on/off
 		while i < NUMBER_OF_EFFECTS:
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
@@ -182,7 +184,6 @@ class Midi(singleton.SingletonClass):
 				else:
 					msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
 				self.send(msg)
-				time.sleep(0.01)
 			i += 1
 
 		# volume
@@ -192,44 +193,50 @@ class Midi(singleton.SingletonClass):
 			data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
 			msg = mido.Message.from_hex(data)
 			self.send(msg)
-			time.sleep(0.01)
 
 		# cc1
 		if (not old_scene or old_scene.cc1 != scene.cc1) and scene.cc1 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=scene.cc1)
 			self.send(msg)
-			time.sleep(0.01)			
 
 		# cc2
 		if (not old_scene or old_scene.cc2 != scene.cc2) and scene.cc2 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=scene.cc2)
 			self.send(msg)
-			time.sleep(0.01)
 
 		# External PC (for switching ToneX presets)
 		if (not old_scene or old_scene.ext_pc != scene.ext_pc) and scene.ext_pc != -1:
 			msg = mido.Message('program_change', channel=MIDI_EXT_CHANNEL, program=scene.ext_pc)
 			self.send(msg)
-			time.sleep(0.01)
+
+		self.edit_mode_off()
 
 	def output_effect(self, effect):
+		self.edit_mode_on()
+
 		fxname = index_to_fx_name_map[effect.index]
 		if effect.enabled:
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
 		else:
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
 		self.send(msg)
-		time.sleep(0.01)
+
+		self.edit_mode_off()
 
 	def output_volume(self, volume):
+		self.edit_mode_on()
+
 		sysex_vol = 0x0C + volume.value + 20
 		checksum = 81 - sysex_vol
 		data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
 		msg = mido.Message.from_hex(data)
 		self.send(msg)
-		time.sleep(0.01)
+
+		self.edit_mode_off()
 
 	def output_cc(self, cc):
+		self.edit_mode_on()
+
 		if cc.value >= 0 and cc.value < 128:
 			if cc.id == "cc1":
 				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=cc.value)
@@ -240,14 +247,16 @@ class Midi(singleton.SingletonClass):
 
 			if msg:
 				self.send(msg)
-			time.sleep(0.01)
+
+		self.edit_mode_off()
 
 	def output_pc(self, pc):
+		self.edit_mode_on()
 		if pc.value >= 0 and pc.value < 128:
 			if pc.id == "ext_pc":
 				msg = mido.Message('program_change', channel=MIDI_EXT_CHANNEL, program=pc.value)
 				self.send(msg)
-
+		self.edit_mode_off()
 			
 					
 
