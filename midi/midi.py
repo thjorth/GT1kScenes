@@ -143,7 +143,9 @@ class Midi(singleton.SingletonClass):
 
 			if self.is_patch_change_sysex(msg):
 				# The program number is hidden in msg.data[12]
+				self.edit_mode_on()
 				self.preset.select_preset(msg.data[12])
+				self.edit_mode_off()
 
 		# now check the scene selector midi in to see if there is something that needs to be handled
 		pc = self.scene_selector_midiin.poll()
