@@ -27,6 +27,7 @@ CC2 = 83
 CC_EXT = 7
 
 NUMBER_OF_EFFECTS = 10
+NUMBER_OF_SYSX_EFFECTS = 6
 
 # the channel that is used for changing scenes within a preset
 MIDI_SCENE_SELECT_CHANNEL = 0
@@ -109,15 +110,17 @@ class Midi(singleton.SingletonClass):
 		pass
 
 	def edit_mode_on(self):
-		edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
-		self.midiout.send(edit_mode_msg)
-		time.sleep(0.02)
+		if self.midiout:
+			edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
+			self.midiout.send(edit_mode_msg)
+			time.sleep(0.02)
 
 	def edit_mode_off(self):
-		time.sleep(0.2)
-		edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
-		self.midiout.send(edit_mode_msg)
-		time.sleep(0.1)
+		if self.midiout:
+			time.sleep(0.2)
+			edit_mode_msg = mido.Message.from_hex(EDIT_MODE_OFF)
+			self.midiout.send(edit_mode_msg)
+			time.sleep(0.1)
 
 
 	def send(self, msg):
@@ -131,7 +134,7 @@ class Midi(singleton.SingletonClass):
 		msg = self.midiin.poll()
 		if msg:
 			print(msg)
-			if msg.type != "sysex":
+			if msg.type != "sysex" and msg.channel != 0:
 				# now write these messages to the midi out to allow midi to pass through if it was not transmitted on channel 0
 				self.send(msg)
 
@@ -181,12 +184,21 @@ class Midi(singleton.SingletonClass):
 		# effects on/off
 		while i < NUMBER_OF_EFFECTS:
 			if not old_scene or old_scene.effects[i] != scene.effects[i]:
-				fxname = index_to_fx_name_map[i]
-				if scene.effects[i]:
-					msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
+				if i < NUMBER_OF_SYSX_EFFECTS:
+					fxname = index_to_fx_name_map[i]
+					if scene.effects[i]:
+						msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
+					else:
+						msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
+					self.send(msg)
 				else:
-					msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
-				self.send(msg)
+					cc = index_to_cc_map[i]
+					if scene.effects[i]:
+						value = 127
+					else:
+						value = 0
+					msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=cc, value=value)
+					self.send(msg)
 			i += 1
 
 		# volume
