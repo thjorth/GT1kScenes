@@ -20,6 +20,7 @@ import singleton
 
 MIDI_DEVICE = CONFIG.main_midi_device
 SCENE_CHANGE_DEVICE = CONFIG.scene_select_midi_device
+GT_1000_MIDI_DEVICE = "GT-1000 MIDI"
 EFFECT_CC_START = 71
 CC_VOL = 81
 CC1 = 82
@@ -73,20 +74,29 @@ class Midi(singleton.SingletonClass):
 		self.midiout_index = -1
 		self.midiin_index = -1
 
+		self.gt_usb_connected = False
+
 		available_out_ports = mido.get_output_names()
 		i = 0
 		self.midiout = None
+		self.midiout_gt = None
 		while i < len(available_out_ports):
 			if available_out_ports[i].startswith(MIDI_DEVICE) and not self.midiout:
 				self.midiout_index = i
 				print("out: ", available_out_ports[i])
 				self.midiout = mido.open_output(available_out_ports[i])
+			if available_out_ports[i].startswith(GT_1000_MIDI_DEVICE) and not self.midiout_gt:
+				self.midiout_gt = mido.open_output(available_out_ports[i])
+				self.gt_usb_connected = True
 			i += 1
+		if not self.midiout_gt:
+			self.midiout_gt = self.midiout
 
 		available_in_ports = mido.get_input_names()
 		print("ins: ", available_in_ports)
 		self.scene_selector_midiin = None
 		self.midiin = None
+		self.midiin_gt = None		
 		i = 0
 		while i < len(available_in_ports):
 			if available_in_ports[i].startswith(MIDI_DEVICE) and not self.midiin:
@@ -95,7 +105,11 @@ class Midi(singleton.SingletonClass):
 				self.midiin = mido.open_input(available_in_ports[i])
 			if available_in_ports[i].startswith(SCENE_CHANGE_DEVICE) and not self.scene_selector_midiin:
 				self.scene_selector_midiin = mido.open_input(available_in_ports[i])
+			if available_in_ports[i].startswith(GT_1000_MIDI_DEVICE) and not self.midiin_gt:
+				self.midiin_gt = mido.open_input(available_in_ports[i])
 			i += 1
+		if not self.midiin_gt:
+			self.midiin_gt = self.midiin
 
 		if not self.midiin:
 			self.midiin = Dummy()
@@ -129,6 +143,11 @@ class Midi(singleton.SingletonClass):
 		if self.midiout and not self.midiout.closed:
 			print(msg)
 			self.midiout.send(msg)
+			time.sleep(0.01)
+
+	def send_to_gt(self, msg):
+		if self.midiout_gt and not self.midiout_gt.closed:
+			self.midiout_gt.send(msg)
 			time.sleep(0.01)
 
 	def respond(self):
@@ -192,7 +211,7 @@ class Midi(singleton.SingletonClass):
 						msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
 					else:
 						msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
-					self.send(msg)
+					self.send_to_gt(msg)
 				else:
 					cc = index_to_cc_map[i]
 					if scene.effects[i]:
@@ -200,7 +219,7 @@ class Midi(singleton.SingletonClass):
 					else:
 						value = 0
 					msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=cc, value=value)
-					self.send(msg)
+					self.send_to_gt(msg)
 			i += 1
 
 		# volume
@@ -209,17 +228,17 @@ class Midi(singleton.SingletonClass):
 			checksum = 81 - sysex_vol
 			data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
 			msg = mido.Message.from_hex(data)
-			self.send(msg)
+			self.send_to_gt(msg)
 
 		# cc1
 		if (not old_scene or old_scene.cc1 != scene.cc1) and scene.cc1 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC1, value=scene.cc1)
-			self.send(msg)
+			self.send_to_gt(msg)
 
 		# cc2
 		if (not old_scene or old_scene.cc2 != scene.cc2) and scene.cc2 != -1:
 			msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC2, value=scene.cc2)
-			self.send(msg)
+			self.send_to_gt(msg)
 
 		# External PC (for switching ToneX presets)
 		if (not old_scene or old_scene.ext_pc != scene.ext_pc) and scene.ext_pc != -1:
@@ -236,7 +255,7 @@ class Midi(singleton.SingletonClass):
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][0])
 		else:
 			msg = mido.Message.from_hex(fx_sysx_map[fxname][1])
-		self.send(msg)
+		self.send_to_gt(msg)
 
 		self.edit_mode_off()
 
@@ -247,7 +266,7 @@ class Midi(singleton.SingletonClass):
 		checksum = 81 - sysex_vol
 		data = "F0 41 00 00 00 00 4F 12 10 00 1B 04 {0:02x} {1:02x} F7".format(sysex_vol, checksum)
 		msg = mido.Message.from_hex(data)
-		self.send(msg)
+		self.send_to_gt(msg)
 
 		self.edit_mode_off()
 
@@ -263,7 +282,7 @@ class Midi(singleton.SingletonClass):
 				msg = mido.Message('control_change', channel=MIDI_EFFECTS_CHANNEL, control=CC_EXT, value=cc.value)
 
 			if msg:
-				self.send(msg)
+				self.send_to_gt(msg)
 
 		self.edit_mode_off()
 
