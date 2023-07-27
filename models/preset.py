@@ -56,13 +56,13 @@ class Preset():
 		chorus = widgets.effectWidget.EffectWidget(screen, 0, 1, COLOR_CHORUS, "Chorus")
 		self.effects_widget.add(chorus)
 
-		effect1 = widgets.effectWidget.EffectWidget(screen, 1, 1, COLOR_GREEN, "FX 1")
+		effect1 = widgets.effectWidget.EffectWidget(screen, 1, 1, COLOR_GREEN, "CC 77")
 		self.effects_widget.add(effect1)
-		effect2 = widgets.effectWidget.EffectWidget(screen, 2, 1, COLOR_GREEN, "FX 2")
+		effect2 = widgets.effectWidget.EffectWidget(screen, 2, 1, COLOR_GREEN, "CC 78")
 		self.effects_widget.add(effect2)
-		effect3 = widgets.effectWidget.EffectWidget(screen, 3, 1, COLOR_GREEN, "FX 3")
+		effect3 = widgets.effectWidget.EffectWidget(screen, 3, 1, COLOR_GREEN, "CC 79")
 		self.effects_widget.add(effect3)
-		effect4 = widgets.effectWidget.EffectWidget(screen, 4, 1, COLOR_GREEN, "FX 4")
+		effect4 = widgets.effectWidget.EffectWidget(screen, 4, 1, COLOR_GREEN, "CC 80")
 		self.effects_widget.add(effect4)
 
 		volume = widgets.volumeWidget.VolumeWidget(screen, 0, 2, COLOR_CC, "Volume")
