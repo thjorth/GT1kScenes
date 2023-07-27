@@ -88,6 +88,9 @@ class Midi(singleton.SingletonClass):
 			if available_out_ports[i].startswith(GT_1000_MIDI_DEVICE) and not self.midiout_gt:
 				self.midiout_gt = mido.open_output(available_out_ports[i])
 				self.gt_usb_connected = True
+				edit_mode_msg = mido.Message.from_hex(EDIT_MODE_ON)
+				self.midiout_gt.send(edit_mode_msg)
+				
 			i += 1
 		if not self.midiout_gt:
 			self.midiout_gt = self.midiout
