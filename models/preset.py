@@ -153,7 +153,7 @@ class Preset():
 		name = self.name.replace("\n", "")
 		if name != "":
 			preset_str += "   " + name
-		text = self.fonts.scene_label_font.render(preset_str, True, SCENE_TEXT_COLOR)
+		text = self.fonts.scene_name_font.render(preset_str, True, SCENE_TEXT_COLOR)
 		self.screen.blit(text, (240, 20))
 
 		scene_no = self.fonts.scene_font.render(str(self.active_scene_index + 1), True, SCENE_TEXT_COLOR)
