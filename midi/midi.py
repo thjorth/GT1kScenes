@@ -28,7 +28,7 @@ CC2 = 83
 CC_EXT = 7
 
 NUMBER_OF_EFFECTS = 10
-NUMBER_OF_SYSX_EFFECTS = 6
+NUMBER_OF_SYSX_EFFECTS = 0
 
 # the channel that is used for changing scenes within a preset
 MIDI_SCENE_SELECT_CHANNEL = 0
@@ -164,6 +164,7 @@ class Midi(singleton.SingletonClass):
 
 			# check if there is a PC on channel 0. If there is, then switch to another preset
 			if msg.type == "program_change" and msg.channel == 0:
+				time.sleep(0.5)
 				self.preset.select_preset(msg.program)
 
 			if msg.type == "control_change" and msg.channel == 0 and msg.control >= 1 and msg.control <= 6 and msg.value == 127:
@@ -179,6 +180,7 @@ class Midi(singleton.SingletonClass):
 		pc = self.scene_selector_midiin.poll()
 		if pc:
 			# select a new scene
+			time.sleep(0.5)
 			self.preset.select_scene(pc.program)
 
 		return False
